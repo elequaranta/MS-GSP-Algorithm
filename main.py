@@ -1,8 +1,9 @@
 import re
 
 
-def readInput(path):
-    with open(path, 'r') as data:
+
+def readInput():
+    with open('/Users/elequaranta/Documents/Chicago/CS583/MS-GSP/data.txt', 'r') as data:
         sequence = []
         for lines in data:
             transactions = lines[1:-2]
@@ -11,7 +12,8 @@ def readInput(path):
             seq = [[item.strip() for item in transact] for transact in lists]
             sequence.append(seq)
         data.close()
-    return sequence
+    global sequences
+    sequences = sequence
 
 def load_MIS_sdc(path, items):
     read_MIS = dict()
@@ -24,17 +26,19 @@ def load_MIS_sdc(path, items):
                 value = float(line[line.find('=')+1:].strip())
                 read_MIS[item] = value
             elif('sdc' in line.lower()):
-                sdc = float(line[line.find('=')+1:].strip())
+                read_sdc = float(line[line.find('=')+1:].strip())
     for item in items:
         if item in read_MIS.keys():
             final_MIS[item] = read_MIS[item]
         else:
             final_MIS[item] = read_MIS['rest']
-    return final_MIS, sdc            
+    global MIS 
+    MIS = final_MIS
+    global sdc
+    sdc =  read_sdc         
 
 
 def get_unique_items(sequences):
-    # Returns unique items from the given sequences
     items = []
     for sequence in sequences:
         for transaction in sequence:
@@ -43,7 +47,7 @@ def get_unique_items(sequences):
                     items.append(element) 
     return items
 
-def init_pass(MIS, sequences):
+def init_pass():
     M = list(dict(sorted(MIS.items(), key=lambda x:x[1])).keys())
     #scan the sequences once to count the support of each item
     sup_counts = dict.fromkeys(M, 0)
@@ -68,16 +72,9 @@ def init_pass(MIS, sequences):
             item = M[j]
             if sup_counts[item] >= MIS[M[first_idx]]*len(sequences):
                 L.append(item)
-    return L
+    return L, sup_counts
 
-def generate_f1(l,MIS,sup_counts):
-    f1 = []
-    for item in l[1:]:
-        if sup_counts[item] >= MIS[item]*len(sequences):
-            f1.append(item)
-    return f1
-
-def get_transaction_ms(MIS, transaction):
+def get_transaction_ms(transaction):
     #find the minimum support of the transaction (= lowest minimum support of the items)
     #and return the position of the element in the transaction (as an index)
     minsups = []
@@ -87,8 +84,17 @@ def get_transaction_ms(MIS, transaction):
     min_position = minsups.index(min_value)
     return min_value, min_position
 
-def level2_candidate_gen(L,sup_counts,MIS,sdc):
-    item_sups = sup_counts / len(sequences)
+
+def generate_f1(l,sup_counts):
+    f1 = []
+    for item in l[1:]:
+        if sup_counts[item] >= MIS[item]*len(sequences):
+            f1.append(item)
+    return f1
+
+def level2_candidate_gen(L,sup_counts):
+    item_sups= {k : val/len(sequences) for k, val in sup_counts.items()}
+    #item_sups = sup_counts / len(sequences)
     candidates = []
     for l in L:
         if item_sups[l] >= MIS[l]:
@@ -97,14 +103,21 @@ def level2_candidate_gen(L,sup_counts,MIS,sdc):
                     candidates.extend([[[l,h]],[[l],[h]],[[h],[l]]])
     return candidates
 
+
+
 def main():
-    sequences = readInput('/Users/aarshpatel/Downloads/DMTM (CS 583)/Project 1/MS-GSP-Algorithm/data.txt')   
+    readInput()   
     items = get_unique_items(sequences)
     print(items)
-    MIS, sdc = load_MIS_sdc('/Users/aarshpatel/Downloads/DMTM (CS 583)/Project 1/MS-GSP-Algorithm/para.txt', items)
-    print(MIS)   
-    L = init_pass(MIS, sequences)
+    load_MIS_sdc('/Users/elequaranta/Documents/Chicago/CS583/MS-GSP/params.txt', items)
+    print(MIS) 
+    print(sdc)  
+    L, sup_counts = init_pass()
     print(L)
+    F1 = generate_f1(L, sup_counts)
+    print(F1)
+    c2 = level2_candidate_gen(L, sup_counts)
+    print(c2)
 
 if __name__ == '__main__':
     main()
