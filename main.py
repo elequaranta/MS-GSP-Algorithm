@@ -69,6 +69,17 @@ def init_pass(MIS, sequences):
                 L.append(item)
     return L
 
+def get_transaction_ms(MIS, transaction):
+    #find the minimum support of the transaction (= lowest minimum support of the items)
+    #and return the position of the element in the transaction (as an index)
+    minsups = []
+    for item in transaction:
+        minsups.append[MIS[item]] #this is an ordered list of the minsups of each item in the transaction
+    min_value = min(minsups)
+    min_position = minsups.index(min_value)
+    return min_value, min_position
+
+
 def main():
     sequences = readInput()   
     items = get_unique_items(sequences)
