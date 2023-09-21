@@ -1,8 +1,8 @@
 import re
 
 
-def readInput():
-    with open('/Users/elequaranta/Documents/Chicago/CS583/MS-GSP/data.txt', 'r') as data:
+def readInput(path):
+    with open(path, 'r') as data:
         sequence = []
         for lines in data:
             transactions = lines[1:-2]
@@ -34,6 +34,7 @@ def load_MIS_sdc(path, items):
 
 
 def get_unique_items(sequences):
+    # Returns unique items from the given sequences
     items = []
     for sequence in sequences:
         for transaction in sequence:
@@ -69,6 +70,13 @@ def init_pass(MIS, sequences):
                 L.append(item)
     return L
 
+def generate_f1(l,MIS,sup_counts):
+    f1 = []
+    for item in l[1:]:
+        if sup_counts[item] >= MIS[item]*len(sequences):
+            f1.append(item)
+    return f1
+
 def get_transaction_ms(MIS, transaction):
     #find the minimum support of the transaction (= lowest minimum support of the items)
     #and return the position of the element in the transaction (as an index)
@@ -79,12 +87,21 @@ def get_transaction_ms(MIS, transaction):
     min_position = minsups.index(min_value)
     return min_value, min_position
 
+def level2_candidate_gen(L,sup_counts,MIS,sdc):
+    item_sups = sup_counts / len(sequences)
+    candidates = []
+    for l in L:
+        if item_sups[l] >= MIS[l]:
+            for h in L[L.index(l)+1:]:
+                if (item_sups[h] >= MIS[l]) and (abs(item_sups[h] - item_sups[l]) <= sdc) :
+                    candidates.extend([[[l,h]],[[l],[h]],[[h],[l]]])
+    return candidates
 
 def main():
-    sequences = readInput()   
+    sequences = readInput('/Users/aarshpatel/Downloads/DMTM (CS 583)/Project 1/MS-GSP-Algorithm/data.txt')   
     items = get_unique_items(sequences)
     print(items)
-    MIS, sdc = load_MIS_sdc('/Users/elequaranta/Documents/Chicago/CS583/MS-GSP/params.txt', items)
+    MIS, sdc = load_MIS_sdc('/Users/aarshpatel/Downloads/DMTM (CS 583)/Project 1/MS-GSP-Algorithm/para.txt', items)
     print(MIS)   
     L = init_pass(MIS, sequences)
     print(L)
