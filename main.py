@@ -2,80 +2,81 @@ import re
 
 
 def readInput():
-    with open("data.txt", "r") as data:
+    with open('/Users/elequaranta/Documents/Chicago/CS583/MS-GSP/data.txt', 'r') as data:
         sequence = []
         for lines in data:
             transactions = lines[1:-2]
             parts = transactions.split("}{")
             lists = [part.strip("{}").split(",") for part in parts]
-            seq = [[int(item) for item in transact] for transact in lists]
+            seq = [[item.strip() for item in transact] for transact in lists]
             sequence.append(seq)
         data.close()
     return sequence
 
-sequences = readInput()
-NO_OF_SEQUENCES = len(sequences)
-MIS = {
-    10: 0.45,
-    20: 0.30,
-    30: 0.30,
-    40: 0.45,
-    50: 0.45,
-    60: 0.30,
-    70: 0.30,
-    80: 0.30,
-    90: 0.30,
-    "SDC": 0.1,
-    'rest': 0.69
-}
-
-def sort_items(I,MIS):
-    items_mis = {}
-    for item in I:
-        items_mis[item] = MIS.get(item, MIS['rest'])
-    items_mis = dict(sorted(items_mis.items(), key=lambda item: item[1]))
-    return list(items_mis.keys())
-
-def item_actual_support(items,sequences):
-    i = {}
+def load_MIS_sdc(path, items):
+    read_MIS = dict()
+    final_MIS = dict()
+    with open(path, 'r') as file:
+        lines = file.readlines()
+        for line in lines:
+            if('mis' in line.lower()):
+                item = line[line.find("(")+1:line.find(")")].strip() #if we don't parse to integer it will be able to work with letters as items as well + with MIS(rest)
+                value = float(line[line.find('=')+1:].strip())
+                read_MIS[item] = value
+            elif('sdc' in line.lower()):
+                sdc = float(line[line.find('=')+1:].strip())
     for item in items:
-        item_occur = 0
-        for seq in sequences:
-            for transact in seq:
-                if item in transact:
-                    item_occur+=1
-                    break
-        i[item] = item_occur / NO_OF_SEQUENCES
-    return i
+        if item in read_MIS.keys():
+            final_MIS[item] = read_MIS[item]
+        else:
+            final_MIS[item] = read_MIS['rest']
+    return final_MIS, sdc            
 
-def generate_L(M, MIS, actual_support):
-    l = []
-    for item in M:
-        if not (l) and (actual_support[item] >= MIS[item]):
-            l.append(item)
-        elif l and (actual_support[item] >= MIS[l[0]]):
-            l.append(item)
-    return l
 
 def get_unique_items(sequences):
-    unique_items = []
-    for seq in sequences:
-        for transact in seq:
-            for item in transact:
-                if item not in unique_items:
-                    unique_items.append(item)
-    return unique_items
+    items = []
+    for sequence in sequences:
+        for transaction in sequence:
+            for element in transaction:
+                if element not in items:
+                    items.append(element) 
+    return items
 
-def generate_F1(l,mis,actual_support):
-    f1 = []
-    for item in l:
-        if actual_support[item] >= mis[item]:
-            f1.append(item)
-    return f1
+def init_pass(MIS, sequences):
+    M = list(dict(sorted(MIS.items(), key=lambda x:x[1])).keys())
+    #scan the sequences once to count the support of each item
+    sup_counts = dict.fromkeys(M, 0)
+    for sequence in sequences:
+        for transaction in sequence:
+            for item in transaction:
+                previous = sup_counts[item]
+                sup_counts[item] = previous + 1
+    #find first item in M meeting its minsup requirement:
+    found = False
+    L = []
+    for i in range (0, len(M)):
+        while found == False:
+            item = M[i]
+            if sup_counts[item] >= MIS[item]*len(sequences):
+                L.append(item)
+                found = True
+                first_idx = i
+    #find every subsequent item satisfying the first item's minsup
+    if found == True:
+        for j in range (first_idx+1, len(M)):
+            item = M[j]
+            if sup_counts[item] >= MIS[M[first_idx]]*len(sequences):
+                L.append(item)
+    return L
 
-I = get_unique_items(sequences)
-M = sort_items(I, MIS)
-ACTUAL_SUPPORT = item_actual_support(I,sequences)
-L = generate_L(M, MIS, ACTUAL_SUPPORT)
-F1 = generate_F1(L, MIS, ACTUAL_SUPPORT)
-print(F1)
+def main():
+    sequences = readInput()   
+    items = get_unique_items(sequences)
+    print(items)
+    MIS, sdc = load_MIS_sdc('/Users/elequaranta/Documents/Chicago/CS583/MS-GSP/params.txt', items)
+    print(MIS)   
+    L = init_pass(MIS, sequences)
+    print(L)
+
+if __name__ == '__main__':
+    main()
