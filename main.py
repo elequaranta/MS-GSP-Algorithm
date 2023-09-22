@@ -51,9 +51,10 @@ def init_pass():
     M = list(dict(sorted(MIS.items(), key=lambda x:x[1])).keys())
     #scan the sequences once to count the support of each item
     sup_counts = dict.fromkeys(M, 0)
+    unique = get_unique_items(sequences)
     for sequence in sequences:
-        for transaction in sequence:
-            for item in transaction:
+        for item in unique:
+            if any(item in transaction for transaction in sequence):
                 previous = sup_counts[item]
                 sup_counts[item] = previous + 1
     #find first item in M meeting its minsup requirement:
@@ -74,14 +75,15 @@ def init_pass():
                 L.append(item)
     return L, sup_counts
 
-def get_transaction_ms(transaction):
-    #find the minimum support of the transaction (= lowest minimum support of the items)
+def get_itemset_ms(sequence):
+    #find the minimum support of an itemset (= lowest minimum support of the items)
     #and return the position of the element in the transaction (as an index)
     minsups = []
-    for item in transaction:
-        minsups.append[MIS[item]] #this is an ordered list of the minsups of each item in the transaction
+    for transaction in sequence:
+        for item in transaction:
+            minsups.append(MIS[item]) #this is an ordered list of the minsups of each item in the transaction
     min_value = min(minsups)
-    min_position = minsups.index(min_value)
+    min_position = [i for i, x in enumerate(minsups) if x == min_value]
     return min_value, min_position
 
 
@@ -105,6 +107,28 @@ def level2_candidate_gen(L,sup_counts):
 
 
 
+
+def get_size(sequence):
+    return len(sequence)
+
+
+def get_length(sequence):
+    length = 0
+    for t in sequence:
+        length = length + len(t)
+    return length
+
+def first_item(sequence):
+    for t in sequence:
+        first = t[0]
+        pass
+    return first
+
+def last_item(sequence):
+    for t in sequence:
+        last = t[-1]
+    return last
+
 def main():
     readInput()   
     items = get_unique_items(sequences)
@@ -114,10 +138,13 @@ def main():
     print(sdc)  
     L, sup_counts = init_pass()
     print(L)
+    print(sup_counts)
     F1 = generate_f1(L, sup_counts)
     print(F1)
     c2 = level2_candidate_gen(L, sup_counts)
     print(c2)
+
+    print(get_itemset_ms(c2[0]))
 
 if __name__ == '__main__':
     main()
