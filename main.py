@@ -227,5 +227,7 @@ def main():
 
     F_test = [[['10'], ['20']], [['50'], ['10']]]
     print(candidate_gen(F_test))
+
+
 if __name__ == '__main__':
     main()
