@@ -1,4 +1,5 @@
 import re
+import copy
 
 
 
@@ -75,11 +76,11 @@ def init_pass():
                 L.append(item)
     return L, sup_counts
 
-def get_itemset_ms(sequence):
+def get_itemset_ms(seq):
     #find the minimum support of an itemset (= lowest minimum support of the items)
     #and return the position of the element in the transaction (as an index)
     minsups = []
-    for transaction in sequence:
+    for transaction in seq:
         for item in transaction:
             minsups.append(MIS[item]) #this is an ordered list of the minsups of each item in the transaction
     min_value = min(minsups)
@@ -106,7 +107,65 @@ def level2_candidate_gen(L,sup_counts):
     return candidates
 
 
-
+def candidate_gen(F_previous):
+    C = []
+    for s1 in F_previous:
+        for s2 in F_previous:
+            minsup1, index1 = get_itemset_ms(s1)
+            minsup2, index2 = get_itemset_ms(s2)
+    #if first item in s1 or last item in s2 is the only one with minimum support:
+            if (index1 == [0]):
+                if((delete_element(s1, 1) == delete_element(s2, get_length(s2)-1))&(MIS[last_item(s2)]>MIS[first_item(s1)])):
+                    if(get_size(s2[-1])==1):
+                        c = copy.deepcopy(s1)
+                        c.append([last_item(s2)])
+                        C.append(c)
+                        if(get_length(s1) == 2 & get_length(s2) == 2 & MIS[last_item(s2)]>MIS[last_item(s1)]):
+                            c = copy.deepcopy(s1)
+                            last_c = copy.deepcopy(c[-1])
+                            last_c.append(last_item(s2))
+                            del c[-1]
+                            c.append(last_c)
+                            C.append(c)
+                    elif((get_length(s1) == 2 & get_size(s1) == 1 & MIS[last_item(s2)]>MIS[last_item(s1)]) | get_length(s1)>2):
+                        c = copy.deepcopy(s1)
+                        last_c = copy.deepcopy(c[-1])
+                        last_c.append(last_item(s2))
+                        del c[-1]
+                        c.append(last_c)
+                        C.append(c)
+            elif(index2 == [get_length(s2)-1]):
+                if((delete_element(s2, 1) == delete_element(s1, 0))&(MIS[first_item(s1)]>MIS[last_item(s2)])):
+                    if(get_size(s1[0]) == 1):
+                        c = copy.deepcopy(s2)
+                        c[0].append(first_item(s1))
+                        C.append(c)
+                        if((get_length(s2) == 2 & get_length(s2) == 2) & (MIS[first_item(s1)]>MIS[first_item(s2)])):
+                            c = [first_item(s1)]
+                            c.append(first_item(s2))
+                            c.append(s2[1:])
+                            C.append(c)
+                    elif(get_length(s2) == 2 & get_size(s2) == 1 & MIS[first_item(s1)]>MIS[first_item(s2)] | get_length(s2) > 2):
+                        c = [first_item(s1)]
+                        c.append(first_item(s2))
+                        c.append(s2[1:])
+                        C.append(c)
+        #general case (= neither the first item in s1 nor the last item in s2 is the only one with minimum support)
+            else:
+                #s1 joins with s2 if s1-{first} == s2-{last}
+                if(delete_element(s1, 0) == delete_element(s2, get_length(s2)-1)):
+                    if get_size(s2[-1]) == 1:
+                        c = copy.deepcopy(s1)
+                        c.append([last_item(s2)])
+                        C.append(c)
+                    else: 
+                        c = copy.deepcopy(s1)
+                        last_c = copy.deepcopy(c[-1])
+                        last_c.append(last_item(s2))
+                        del c[-1]
+                        c.append(last_c)
+                        C.append(c)
+    return C
 
 def get_size(sequence):
     return len(sequence)
@@ -121,13 +180,31 @@ def get_length(sequence):
 def first_item(sequence):
     for t in sequence:
         first = t[0]
-        pass
+        break
     return first
 
 def last_item(sequence):
     for t in sequence:
         last = t[-1]
     return last
+
+def delete_element(passed_sequence, idx):
+    sequence = copy.deepcopy(passed_sequence)
+    if (idx >= 0 & idx < get_length(sequence)):
+        initial_tracker = 0
+        final_tracker = 0
+        for transaction in sequence:
+            initial_tracker = final_tracker
+            num_elements = len(transaction)
+            final_tracker = initial_tracker + num_elements
+            if(final_tracker > idx): #the element to delete is in this sequence
+                del transaction[idx - initial_tracker]
+                break
+        new_sequence = [transaction for transaction in sequence if get_length(transaction) > 0]
+        return new_sequence
+    else:
+        return []
+
 
 def main():
     readInput()   
@@ -146,5 +223,9 @@ def main():
 
     print(get_itemset_ms(c2[0]))
 
+    print(get_length([['30']]))
+
+    F_test = [[['10'], ['20']], [['50'], ['10']]]
+    print(candidate_gen(F_test))
 if __name__ == '__main__':
     main()
