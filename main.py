@@ -282,11 +282,11 @@ def MSGSP(seq_path, MIS_path):
 
 
 def main():
-    seq_path = '/Users/elequaranta/Documents/Chicago/CS583/MS-GSP/data.txt'
-    param_path = '/Users/elequaranta/Documents/Chicago/CS583/MS-GSP/params.txt'
+    seq_path = '/Users/aarshpatel/Downloads/DMTM (CS 583)/Project 1/MS-GSP-Algorithm/data.txt'
+    param_path = '/Users/aarshpatel/Downloads/DMTM (CS 583)/Project 1/MS-GSP-Algorithm/para.txt'
     frequent = MSGSP(seq_path, param_path)
     print(frequent)
-    file = open('/Users/elequaranta/Documents/Chicago/CS583/MS-GSP/results.txt','w')
+    file = open('/Users/aarshpatel/Downloads/DMTM (CS 583)/Project 1/MS-GSP-Algorithm/results.txt','w')
     for seq in frequent:
 	    file.write(str(seq)+"\n")
 
