@@ -3,8 +3,8 @@ import copy
 
 
 
-def readInput():
-    with open('/Users/aarshpatel/Downloads/DMTM (CS 583)/Project 1/MS-GSP-Algorithm/data.txt', 'r') as data:
+def readInput(path):
+    with open(path, 'r') as data:
         sequence = []
         for lines in data:
             transactions = lines[1:-2]
@@ -13,8 +13,7 @@ def readInput():
             seq = [[item.strip() for item in transact] for transact in lists]
             sequence.append(seq)
         data.close()
-    global sequences
-    sequences = sequence
+    return sequence
 
 def load_MIS_sdc(path, items):
     read_MIS = dict()
@@ -33,10 +32,11 @@ def load_MIS_sdc(path, items):
             final_MIS[item] = read_MIS[item]
         else:
             final_MIS[item] = read_MIS['rest']
-    global MIS 
+    global MIS
     MIS = final_MIS
     global sdc
-    sdc =  read_sdc         
+    sdc = read_sdc
+    return final_MIS, read_sdc       
 
 
 def get_unique_items(sequences):
@@ -48,8 +48,7 @@ def get_unique_items(sequences):
                     items.append(element) 
     return items
 
-def init_pass():
-    M = list(dict(sorted(MIS.items(), key=lambda x:x[1])).keys())
+def init_pass(M, sequences):
     #scan the sequences once to count the support of each item
     sup_counts = dict.fromkeys(M, 0)
     unique = get_unique_items(sequences)
@@ -88,16 +87,15 @@ def get_itemset_ms(seq):
     return min_value, min_position
 
 
-def generate_f1(l,sup_counts):
+def generate_f1(l,sup_counts, sequences):
     f1 = []
     for item in l[1:]:
         if sup_counts[item] >= MIS[item]*len(sequences):
             f1.append(item)
     return f1
 
-def level2_candidate_gen(L,sup_counts):
-    item_sups= {k : val/len(sequences) for k, val in sup_counts.items()}
-    print(sup_counts)
+def level2_candidate_gen(num_seq, L, sup_counts):
+    item_sups= {k : val/num_seq for k, val in sup_counts.items()}
     candidates = []
     for l in L:
         if item_sups[l] >= MIS[l]:
@@ -135,7 +133,7 @@ def candidate_gen(F_previous):
                         c.append(last_c)
                         C.append(c)
             elif(index2 == [get_length(s2)-1]):
-                if((delete_element(s2, 1) == delete_element(s1, 0))&(MIS[first_item(s1)]>MIS[last_item(s2)])):
+                if((delete_element(s2, get_length(s2)-2) == delete_element(s1, 0))&(MIS[first_item(s1)]>MIS[last_item(s2)])):
                     if(get_size(s1[0]) == 1):
                         c = copy.deepcopy(s2)
                         c[0].append(first_item(s1))
@@ -165,6 +163,7 @@ def candidate_gen(F_previous):
                         del c[-1]
                         c.append(last_c)
                         C.append(c)
+        C = prune_candidates(C, F_previous)
     return C
 
 def get_size(sequence):
@@ -205,29 +204,97 @@ def delete_element(passed_sequence, idx):
     else:
         return []
 
+def prune_candidates(C, F):
+    C_final = []
+    for c in C:
+        ms, idx = get_itemset_ms(c)
+        tested = 0
+        matches = 0
+        for i in range(0, get_length(c)):
+            if not(idx == [i]):
+                tested = tested + 1
+                c_short = delete_element(c, i)
+                for f in F:
+                    if (subsequence(c_short, f)):
+                       matches = matches + 1
+                       break
+        if(matches == tested):
+            C_final.append(c)
+    return C_final
+
+
+
+def subsequence(sub, super):
+    last_idx = -1
+    matches = 0
+    for e in sub:
+        for i in range(0, get_size(super)):
+            if((set(e) <= (set(super[i]))) & (i>last_idx)):
+                last_idx = i
+                matches = matches + 1
+                break
+    if(matches == get_size(sub)):
+        return True
+    else:
+        return False
+
+#S = [['10'], ['20', '40'], ['30', '70'], ['10', '30', '80', '20']]
+#s = [['10'], ['30'], ['20', '80']]
+
+#subsequence(s, S)
+
+def MSGSP(seq_path, MIS_path):
+    sequences = readInput(seq_path)
+    num_sequences = len(sequences)
+    items = get_unique_items(sequences)
+    load_MIS_sdc(MIS_path, items)
+    M = list(dict(sorted(MIS.items(), key=lambda x:x[1])).keys())
+    L, support_counts = init_pass(M, sequences)
+    F_prev = generate_f1(L, support_counts, sequences)
+    k = 1
+    counts = dict()
+    F = F_prev
+    while(get_length(F_prev) != 0):
+        k = k +1
+        Fk = []
+        if(k == 2):
+            C = level2_candidate_gen(num_sequences, L, support_counts)
+        else:
+            C = candidate_gen(F_prev)
+
+        for c in C:
+            counter = 0
+            counter_short = 0
+            for sequence in sequences:
+                minMS, minIdx = get_itemset_ms(c)
+                c_short = delete_element(c, minIdx[0])
+                if(subsequence(c, sequence)):
+                    counter = counter + 1
+                if(subsequence(c_short, sequence)):
+                    counter_short = counter_short + 1
+            if(counter >= minMS*num_sequences):
+                Fk.append(c)
+        F.extend(Fk)
+        F_prev = copy.deepcopy(Fk)
+    return F                
+
+
+
 
 def main():
-    readInput()   
-    items = get_unique_items(sequences)
-    print('Items:',items)
-    load_MIS_sdc('/Users/aarshpatel/Downloads/DMTM (CS 583)/Project 1/MS-GSP-Algorithm/para.txt', items)
-    print('MIS: ',MIS) 
-    print('sdc: ',sdc)  
-    L, sup_counts = init_pass()
-    print(L)
-    print(sup_counts)
-    F1 = generate_f1(L, sup_counts)
-    print('F1: ',F1)
-    c2 = level2_candidate_gen(L, sup_counts)
-    print(c2)
+    seq_path = '/Users/elequaranta/Documents/Chicago/CS583/MS-GSP/data.txt'
+    param_path = '/Users/elequaranta/Documents/Chicago/CS583/MS-GSP/params.txt'
+    frequent = MSGSP(seq_path, param_path)
+    print(frequent)
+    file = open('/Users/elequaranta/Documents/Chicago/CS583/MS-GSP/results.txt','w')
+    for seq in frequent:
+	    file.write(str(seq)+"\n")
 
-    print(get_itemset_ms(c2[0]))
 
-    print(get_length([['30']]))
+  #  Ctest = [[['40'], ['50'], ['40'], ['30']]]
+  #  Ftest = [[['40'], ['50'], ['30']], [['40'], ['50'], ['40']], [['50'], ['40'], ['30']], [['40'], ['40'], ['30']]]
 
-    F_test = [[['10'], ['20']], [['50'], ['10']]]
-    print(candidate_gen(F_test))
-
+  #  prune_candidates(Ctest, Ftest)
 
 if __name__ == '__main__':
     main()
