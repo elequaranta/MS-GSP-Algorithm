@@ -3,7 +3,7 @@ import re
 
 
 def readInput():
-    with open('/Users/elequaranta/Documents/Chicago/CS583/MS-GSP/data.txt', 'r') as data:
+    with open('/Users/aarshpatel/Downloads/DMTM (CS 583)/Project 1/MS-GSP-Algorithm/data.txt', 'r') as data:
         sequence = []
         for lines in data:
             transactions = lines[1:-2]
@@ -94,7 +94,7 @@ def generate_f1(l,sup_counts):
 
 def level2_candidate_gen(L,sup_counts):
     item_sups= {k : val/len(sequences) for k, val in sup_counts.items()}
-    #item_sups = sup_counts / len(sequences)
+    print(sup_counts)
     candidates = []
     for l in L:
         if item_sups[l] >= MIS[l]:
@@ -108,16 +108,16 @@ def level2_candidate_gen(L,sup_counts):
 def main():
     readInput()   
     items = get_unique_items(sequences)
-    print(items)
-    load_MIS_sdc('/Users/elequaranta/Documents/Chicago/CS583/MS-GSP/params.txt', items)
-    print(MIS) 
-    print(sdc)  
+    print('Items:',items)
+    load_MIS_sdc('/Users/aarshpatel/Downloads/DMTM (CS 583)/Project 1/MS-GSP-Algorithm/para.txt', items)
+    print('MIS: ',MIS) 
+    print('sdc: ',sdc)  
     L, sup_counts = init_pass()
-    print(L)
+    print('L: ',L)
     F1 = generate_f1(L, sup_counts)
-    print(F1)
+    print('F1: ',F1)
     c2 = level2_candidate_gen(L, sup_counts)
-    print(c2)
+    print('c2: ',c2)
 
 if __name__ == '__main__':
     main()
