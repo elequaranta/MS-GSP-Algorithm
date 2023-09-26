@@ -214,12 +214,12 @@ def main():
     print('MIS: ',MIS) 
     print('sdc: ',sdc)  
     L, sup_counts = init_pass()
-    print(L)
-    print(sup_counts)
+    print('L: ',L)
+    print('sup_count: ',sup_counts)
     F1 = generate_f1(L, sup_counts)
     print('F1: ',F1)
     c2 = level2_candidate_gen(L, sup_counts)
-    print(c2)
+    print('c2: ',c2)
 
     print(get_itemset_ms(c2[0]))
 
