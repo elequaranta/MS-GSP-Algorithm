@@ -100,8 +100,10 @@ def generate_f1(l, sup_counts, sequences):
 def level2_candidate_gen(num_seq, L, sup_counts):
     item_sups = {k: val / num_seq for k, val in sup_counts.items()}
     candidates = []
+    # print('L',L)
     for l in L:
         if item_sups[l] >= MIS[l]:
+            candidates.extend([[[l],[l]],[l,l]])
             for h in L[L.index(l) + 1:]:
                 if (item_sups[h] >= MIS[l]) and (abs(item_sups[h] - item_sups[l]) <= sdc):
                     candidates.extend([[[l, h]], [[l], [h]], [[h], [l]]])
@@ -284,6 +286,7 @@ def MSGSP(seq_path, MIS_path):
         Fk = []
         if (k == 2):
             C = level2_candidate_gen(num_sequences, L, support_counts)
+            # print('C',C)
         else:
             C = candidate_gen(F_prev)
         for c in C:
@@ -304,11 +307,11 @@ def MSGSP(seq_path, MIS_path):
 
 
 def main():
-    seq_path = '/Users/elequaranta/Documents/Chicago/CS583/MS-GSP/00/data.txt'
-    param_path = '/Users/elequaranta/Documents/Chicago/CS583/MS-GSP/00/params.txt'
+    seq_path = '/Users/aarshpatel/Downloads/DMTM (CS 583)/Project 1/MS-GSP-Algorithm/data.txt'
+    param_path = '/Users/aarshpatel/Downloads/DMTM (CS 583)/Project 1/MS-GSP-Algorithm/para.txt'
     frequent = MSGSP(seq_path, param_path)
     print(frequent)
-    file = open('/Users/elequaranta/Documents/Chicago/CS583/MS-GSP/00/results.txt', 'w')
+    file = open('/Users/aarshpatel/Downloads/DMTM (CS 583)/Project 1/MS-GSP-Algorithm/results.txt', 'w')
     for seq in frequent:
         file.write(str(seq) + "\n")
     file.close()
