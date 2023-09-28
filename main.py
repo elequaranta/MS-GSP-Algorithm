@@ -103,7 +103,7 @@ def level2_candidate_gen(num_seq, L, sup_counts):
     # print('L',L)
     for l in L:
         if item_sups[l] >= MIS[l]:
-            candidates.extend([[[l],[l]],[l,l]])
+            candidates.extend([[[l],[l]],[[l,l]]])
             for h in L[L.index(l) + 1:]:
                 if (item_sups[h] >= MIS[l]) and (abs(item_sups[h] - item_sups[l]) <= sdc):
                     candidates.extend([[[l, h]], [[l], [h]], [[h], [l]]])
@@ -286,7 +286,7 @@ def MSGSP(seq_path, MIS_path):
         Fk = []
         if (k == 2):
             C = level2_candidate_gen(num_sequences, L, support_counts)
-            # print('C',C)
+            print('C',C)
         else:
             C = candidate_gen(F_prev)
         for c in C:
