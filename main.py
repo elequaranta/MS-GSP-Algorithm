@@ -100,7 +100,6 @@ def generate_f1(l, sup_counts, sequences):
 def level2_candidate_gen(num_seq, L, sup_counts):
     item_sups = {k: val / num_seq for k, val in sup_counts.items()}
     candidates = []
-    # print('L',L)
     for l in L:
         if item_sups[l] >= MIS[l]:
             candidates.extend([[[l],[l]],[[l,l]]])
@@ -257,13 +256,22 @@ def subsequence(sub, super):
     matches = 0
     for e in sub:
         for i in range(0, get_size(super)):
-            if ((set(e) <= (set(super[i]))) & (i > last_idx)):
+            if(contains_transaction(e, super[i]) & (i > last_idx)):
                 last_idx = i
                 matches = matches + 1
                 break
     if (matches == get_size(sub)):
         return True
     else:
+        return False
+    
+def contains_transaction(t, T):
+    temp = copy.deepcopy(T)
+    try:
+        for el in t:
+            temp.remove(el)
+        return True
+    except ValueError:
         return False
 
 
@@ -286,15 +294,14 @@ def MSGSP(seq_path, MIS_path):
         Fk = []
         if (k == 2):
             C = level2_candidate_gen(num_sequences, L, support_counts)
-            print('C',C)
         else:
             C = candidate_gen(F_prev)
         for c in C:
             counter = 0
             counter_short = 0
+            minMS, minIdx = get_itemset_ms(c)
+            c_short = delete_element(c, minIdx[0])
             for sequence in sequences:
-                minMS, minIdx = get_itemset_ms(c)
-                c_short = delete_element(c, minIdx[0])
                 if (subsequence(c, sequence)):
                     counter = counter + 1
                 if (subsequence(c_short, sequence)):
@@ -307,11 +314,11 @@ def MSGSP(seq_path, MIS_path):
 
 
 def main():
-    seq_path = '/Users/aarshpatel/Downloads/DMTM (CS 583)/Project 1/MS-GSP-Algorithm/data.txt'
-    param_path = '/Users/aarshpatel/Downloads/DMTM (CS 583)/Project 1/MS-GSP-Algorithm/para.txt'
+    seq_path = '/Users/elequaranta/Documents/Chicago/CS583/MS-GSP/01/data.txt'
+    param_path = '/Users/elequaranta/Documents/Chicago/CS583/MS-GSP/01/params.txt'
     frequent = MSGSP(seq_path, param_path)
     print(frequent)
-    file = open('/Users/aarshpatel/Downloads/DMTM (CS 583)/Project 1/MS-GSP-Algorithm/results.txt', 'w')
+    file = open('/Users/elequaranta/Documents/Chicago/CS583/MS-GSP/01/results.txt', 'w')
     for seq in frequent:
         file.write(str(seq) + "\n")
     file.close()
