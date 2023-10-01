@@ -1,4 +1,5 @@
 import copy
+import time
 
 
 def readInput(path):
@@ -113,60 +114,73 @@ def candidate_gen(F_previous):
     C = []
     for s1 in F_previous:
         for s2 in F_previous:
+            if(s1==[['9', '1']] and s2==[['9'], ['1']]):
+                print('here')
             minsup1, index1 = get_itemset_ms(s1)
             minsup2, index2 = get_itemset_ms(s2)
             # if first item in s1 or last item in s2 is the only one with minimum support:
             if (index1 == [0]):
-                if ((delete_element(s1, 1) == delete_element(s2, get_length(s2) - 1)) & (
-                        MIS[last_item(s2)] > MIS[first_item(s1)])):
+                flag1 = (delete_element(s1, 1) == delete_element(s2, get_length(s2) - 1))
+                flag2 = (MIS[last_item(s2)] >= MIS[first_item(s1)])
+                if ((delete_element(s1, 1) == delete_element(s2, get_length(s2) - 1)) & (MIS[last_item(s2)] >= MIS[first_item(s1)])):
                     if (get_size(s2[-1]) == 1):
                         c = copy.deepcopy(s1)
                         c.append([last_item(s2)])
-                        if(c == [['2', '5'], ['1']]):
+
+                        if(c==['9', '1', '1']):
                             print('here')
-                        C.append(c)
-                        if ((get_length(s1) == 2 & get_length(s2) == 2) & (MIS[last_item(s2)] > MIS[last_item(s1)])):
-                            c = copy.deepcopy(s1)
-                            last_c = copy.deepcopy(c[-1])
-                            last_c.append(last_item(s2))
-                            del c[-1]
-                            c.append(last_c)
-                            if(c == [['2', '5'], ['1']]):
-                                print('here')
+                        if(check_sdc(c) & (c not in C)):
                             C.append(c)
-                    elif(((get_length(s1) == 2 & get_size(s1) == 1) & (MIS[last_item(s2)] > MIS[last_item(s1)])) or (get_length(s1) > 2)):
+                        if ((get_length(s1) == 2 & get_length(s2) == 2) & (MIS[last_item(s2)] >= MIS[last_item(s1)])):
+                            c = copy.deepcopy(s1)
+                            last_c = copy.deepcopy([c[-1]])
+                            last_c.append([last_item(s2)])
+                            del c[-1]
+                            c.extend(last_c)
+
+                            if(c==['9', '1', '1']):
+                                print('here')
+                            if(check_sdc(c) & (c not in C)):
+                                C.append(c)
+                    elif(((get_length(s1) == 2 & get_size(s1) == 1) & (MIS[last_item(s2)] >= MIS[last_item(s1)])) or (get_length(s1) > 2)):
                         c = copy.deepcopy(s1)
                         last_c = copy.deepcopy(c[-1])
                         last_c.append(last_item(s2))
                         del c[-1]
                         c.append(last_c)
-                        if(c == [['2', '5'], ['1']]):
+                        if(c==['9', '1', '1']):
                             print('here')
-                        C.append(c)
+
+                        if(check_sdc(c) & (c not in C)):
+                            C.append(c)
             elif (index2 == [get_length(s2) - 1]):
-                if ((delete_element(s2, get_length(s2) - 2) == delete_element(s1, 0)) & (
-                        MIS[first_item(s1)] > MIS[last_item(s2)])):
+                if ((delete_element(s2, get_length(s2) - 2) == delete_element(s1, 0)) & (MIS[first_item(s1)] >= MIS[last_item(s2)])):
                     if (get_size(s1[0]) == 1):
                         c = copy.deepcopy(s2)
                         c[0].append(first_item(s1))
-                        if(c == [['2', '5'], ['1']]):
+
+                        if(c==['9', '1', '1']):
                             print('here')
-                        C.append(c)
-                        if ((get_length(s2) == 2 & get_length(s2) == 2) & (MIS[first_item(s1)] > MIS[first_item(s2)])):
+                        if(check_sdc(c) & (c not in C)):
+                            C.append(c)
+                        if ((get_length(s2) == 2 & get_length(s2) == 2) & (MIS[first_item(s1)] >= MIS[first_item(s2)])):
                             c = [[first_item(s1)]]
                             c[0].append(first_item(s2))
                             c.extend(s2[1:])
-                            if(c == [['2', '5'], ['1']]):
+
+                            if(c==['9', '1', '1']):
                                 print('here')
-                            C.append(c)
-                    elif (get_length(s2) == 2 & get_size(s2) == 1 & MIS[first_item(s1)] > MIS[
-                        first_item(s2)] | get_length(s2) > 2):
-                        c = [first_item(s1)]
-                        c.append(first_item(s2))
-                        c.append(s2[1:])
-                        if(c == [['2', '5'], ['1']]):
+                            if(check_sdc(c) & (c not in C)):
+                                C.append(c)
+                    elif(((get_length(s2) == 2 & get_size(s2) == 1) & (MIS[first_item(s1)] >= MIS[first_item(s2)])) or (get_length(s2) > 2)):
+                        c = [[first_item(s1)]]
+                        c[0].append(first_item(s2))
+                        c.extend(s2[1:])
+
+                        if(c==['9', '1', '1']):
                             print('here')
-                        C.append(c)
+                        if(check_sdc(c) & (c not in C)):
+                            C.append(c)
             # general case (= neither the first item in s1 nor the last item in s2 is the only one with minimum support)
             else:
                 # s1 joins with s2 if s1-{first} == s2-{last}
@@ -174,20 +188,22 @@ def candidate_gen(F_previous):
                     if get_size(s2[-1]) == 1:
                         c = copy.deepcopy(s1)
                         c.append([last_item(s2)])
-                        if(c == [['2', '5'], ['1']]):
-                            print('here')
-                        C.append(c)
+
+                        if(check_sdc(c) & (c not in C)):
+                            C.append(c)
                     else:
                         c = copy.deepcopy(s1)
                         last_c = copy.deepcopy(c[-1])
                         last_c.append(last_item(s2))
                         del c[-1]
                         c.append(last_c)
-                        if(c == [['2', '5'], ['1']]):
-                            print('here')
-                        C.append(c)
-        C = prune_candidates(C, F_previous)
-    return C
+
+                        if(check_sdc(c) & (c not in C)):
+                            C.append(c)
+        
+        pruned_C = prune_candidates(C, F_previous)
+
+    return pruned_C
 
 
 def get_size(sequence):
@@ -213,6 +229,13 @@ def last_item(sequence):
         last = t[-1]
     return last
 
+def lexicographic_order(candidate):
+    sorted_c = []
+    for t in candidate:
+        sorted_t = sorted(t)
+        sorted_c.append(sorted_t)
+    return sorted_c
+        
 
 def delete_element(passed_sequence, idx):
     sequence = copy.deepcopy(passed_sequence)
@@ -235,6 +258,8 @@ def delete_element(passed_sequence, idx):
 def prune_candidates(C, F):
     C_final = []
     for c in C:
+        if(c == ['9', '1', '1']):
+            print('here')
         ms, idx = get_itemset_ms(c)
         tested = 0
         matches = 0
@@ -273,6 +298,20 @@ def contains_transaction(t, T):
         return True
     except ValueError:
         return False
+    
+def check_sdc(candidate):
+    unique = [element for transaction in candidate for element in transaction]
+    mis_list = []
+    for el in unique:
+        mis_list.append(MIS[el])
+    max_val = max(mis_list)
+    min_val = min(mis_list)
+    if((max_val - min_val) <= sdc):
+        return True
+    else:
+        return False
+    
+#def remove_duplicate_sequences(Fk):
 
 
 # S = [['10'], ['20', '40'], ['30', '70'], ['10', '30', '80', '20']]
@@ -298,14 +337,10 @@ def MSGSP(seq_path, MIS_path):
             C = candidate_gen(F_prev)
         for c in C:
             counter = 0
-            counter_short = 0
             minMS, minIdx = get_itemset_ms(c)
-            c_short = delete_element(c, minIdx[0])
             for sequence in sequences:
                 if (subsequence(c, sequence)):
                     counter = counter + 1
-                if (subsequence(c_short, sequence)):
-                    counter_short = counter_short + 1
             if (counter >= minMS * num_sequences):
                 Fk.append(c)
         F.extend(Fk)
@@ -314,11 +349,14 @@ def MSGSP(seq_path, MIS_path):
 
 
 def main():
-    seq_path = '/Users/elequaranta/Documents/Chicago/CS583/MS-GSP/01/data.txt'
-    param_path = '/Users/elequaranta/Documents/Chicago/CS583/MS-GSP/01/params.txt'
+    seq_path = '/Users/elequaranta/Documents/Chicago/CS583/MS-GSP/00/data.txt'
+    param_path = '/Users/elequaranta/Documents/Chicago/CS583/MS-GSP/00/params.txt'
+    start = time.time()
     frequent = MSGSP(seq_path, param_path)
+    end = time.time()
     print(frequent)
-    file = open('/Users/elequaranta/Documents/Chicago/CS583/MS-GSP/01/results.txt', 'w')
+    print('Time elapsed: ', end-start)
+    file = open('/Users/elequaranta/Documents/Chicago/CS583/MS-GSP/00/results.txt', 'w')
     for seq in frequent:
         file.write(str(seq) + "\n")
     file.close()
