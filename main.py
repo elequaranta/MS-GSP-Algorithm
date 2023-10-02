@@ -94,7 +94,7 @@ def generate_f1(l, sup_counts, sequences):
     f1 = []
     for item in l:
         if sup_counts[item] >= MIS[item] * len(sequences):
-            f1.append([item])
+            f1.append([[item]])
     return f1
 
 
@@ -385,14 +385,14 @@ def print_format(sequence):
     return return_string
 
 def main():
-    seq_path = '/Users/elequaranta/Documents/Chicago/CS583/MS-GSP/00/data.txt'
-    param_path = '/Users/elequaranta/Documents/Chicago/CS583/MS-GSP/00/params.txt'
+    seq_path = '/Users/aarshpatel/Downloads/DMTM (CS 583)/Project 1/MS-GSP-Algorithm/data.txt'
+    param_path = '/Users/aarshpatel/Downloads/DMTM (CS 583)/Project 1/MS-GSP-Algorithm/para.txt'
     start = time.time()
     frequent = MSGSP(seq_path, param_path)
     end = time.time()
     print(frequent)
     print('Time elapsed: ', end-start)
-    file = open('/Users/elequaranta/Documents/Chicago/CS583/MS-GSP/00/results.txt', 'w')
+    file = open('/Users/aarshpatel/Downloads/DMTM (CS 583)/Project 1/MS-GSP-Algorithm/results.txt', 'w')
     for i in range (0, len(frequent)):
         Fk = frequent[i]
         counter = 0
