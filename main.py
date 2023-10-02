@@ -114,7 +114,7 @@ def candidate_gen(F_previous):
     C = []
     for s1 in F_previous:
         for s2 in F_previous:
-            if(s1 == [['8'], ['4']] and s2 == [['4'], ['6']]):
+            if(s1 == [['8', '5'], ['3']] and s2 == [['8', '5'], ['3']]):
                 print('here')
             minsup1, index1 = get_itemset_ms(s1)
             minsup2, index2 = get_itemset_ms(s2)
@@ -124,17 +124,17 @@ def candidate_gen(F_previous):
                     if (get_size(s2[-1]) == 1):
                         c = copy.deepcopy(s1)
                         c.append([last_item(s2)])
-                        if(c == [['2', '3', '2'], ['9']]):
+                        if(c == [['4', '7'], ['3']]):
                             print('here')
                         if(check_sdc(c) and is_contained(c, C) == False):
                             C.append(c)
-                        if ((get_length(s1) == 2 & get_length(s2) == 2) & (MIS[last_item(s2)] >= MIS[last_item(s1)])):
+                        if ((get_length(s1) == 2 and get_length(s2) == 2) & (MIS[last_item(s2)] >= MIS[last_item(s1)])):
                             c = copy.deepcopy(s1)
                             last_c = copy.deepcopy([c[-1]])
                             last_c[0].append(last_item(s2))
                             del c[-1]
                             c.extend(last_c)
-                            if(c == [['2', '3', '2'], ['9']]):
+                            if(c == [['4', '7'], ['3']]):
                                 print('here')
                             if(check_sdc(c) and is_contained(c, C) == False):
                                 C.append(c)
@@ -144,7 +144,7 @@ def candidate_gen(F_previous):
                         last_c.append(last_item(s2))
                         del c[-1]
                         c.append(last_c)
-                        if(c == [['2', '3', '2'], ['9']]):
+                        if(c == [['4', '7'], ['3']]):
                             print('here')
                         if(check_sdc(c) and is_contained(c, C) == False):
                             C.append(c)
@@ -152,8 +152,8 @@ def candidate_gen(F_previous):
                 if ((delete_element(s2, get_length(s2) - 2) == delete_element(s1, 0)) & (MIS[first_item(s1)] >= MIS[last_item(s2)])):
                     if (get_size(s1[0]) == 1):
                         c = copy.deepcopy(s2)
-                        c[0].append(first_item(s1))
-                        if(c == [['2', '3', '2'], ['9']]):
+                        c.insert(0, [first_item(s1)])
+                        if(c == [['4', '7'], ['3']]):
                             print('here')
                         if(check_sdc(c) and is_contained(c, C) == False):
                             C.append(c)
@@ -161,15 +161,15 @@ def candidate_gen(F_previous):
                             c = [[first_item(s1)]]
                             c[0].append(first_item(s2))
                             c.extend(s2[1:])
-                            if(c == [['2', '3', '2'], ['9']]):
+                            if(c == [['4', '7'], ['3']]):
                                 print('here')
                             if(check_sdc(c) and is_contained(c, C) == False):
                                 C.append(c)
                     elif(((get_length(s2) == 2 & get_size(s2) == 1) & (MIS[first_item(s1)] >= MIS[first_item(s2)])) or (get_length(s2) > 2)):
                         c = [[first_item(s1)]]
-                        c[0].append(first_item(s2))
+                        c[0].extend(s2[0])
                         c.extend(s2[1:])
-                        if(c == [['2', '3', '2'], ['9']]):
+                        if(c == [['4', '7'], ['3']]):
                             print('here')
                         if(check_sdc(c) and is_contained(c, C) == False):
                             C.append(c)
@@ -180,7 +180,7 @@ def candidate_gen(F_previous):
                     if get_size(s2[-1]) == 1:
                         c = copy.deepcopy(s1)
                         c.append([last_item(s2)])
-                        if(c == [['2', '3', '2'], ['9']]):
+                        if(c == [['4', '7'], ['3']]):
                             print('here')
                         if(check_sdc(c) and is_contained(c, C) == False):
                             C.append(c)
@@ -190,12 +190,12 @@ def candidate_gen(F_previous):
                         last_c.append(last_item(s2))
                         del c[-1]
                         c.append(last_c)
-                        if(c == [['2', '3', '2'], ['9']]):
+                        if(c == [['4', '7'], ['3']]):
                             print('here')
                         if(check_sdc(c) and is_contained(c, C) == False):
                             C.append(c)
         
-        pruned_C = prune_candidates(C, F_previous)
+    pruned_C = prune_candidates(C, F_previous)
 
     return pruned_C
 
@@ -252,6 +252,8 @@ def delete_element(passed_sequence, idx):
 def prune_candidates(C, F):
     C_final = []
     for c in C:
+        if(c == [['8'], ['4', '6']]):
+            print('here')
         ms, idx = get_itemset_ms(c)
         tested = 0
         matches = 0
@@ -330,6 +332,7 @@ def is_contained(c_passed, C):
 
 
 def MSGSP(seq_path, MIS_path):
+    F = []
     sequences = readInput(seq_path)
     num_sequences = len(sequences)
     items = get_unique_items(sequences)
@@ -337,8 +340,8 @@ def MSGSP(seq_path, MIS_path):
     M = list(dict(sorted(MIS.items(), key=lambda x: x[1])).keys())
     L, support_counts = init_pass(M, sequences)
     F_prev = generate_f1(L, support_counts, sequences)
+    F.append(F_prev)
     k = 1
-    F = F_prev
     while (get_length(F_prev) != 0):
         k = k + 1
         Fk = []
@@ -347,29 +350,59 @@ def MSGSP(seq_path, MIS_path):
         else:
             C = candidate_gen(F_prev)
         for c in C:
+            if(c == [['9', '2'], ['3']]):
+                print('here')
             counter = 0
             minMS, minIdx = get_itemset_ms(c)
             for sequence in sequences:
                 if (subsequence(c, sequence)):
                     counter = counter + 1
-            if ((counter >= minMS * num_sequences) & (c not in F)):
+
+            flag1 = (counter >= minMS * num_sequences)
+            term2 = minMS * num_sequences
+            flag2 = (c not in F)
+            if ((counter >= float(format((minMS * num_sequences), '.10g'))) & (c not in F)):
                 Fk.append(c)
-        F.extend(Fk)
+        if not(len(Fk)==0):
+            F.append(Fk)
         F_prev = copy.deepcopy(Fk)
     return F
 
 
+def print_format(sequence):
+    return_string = ''
+    for transaction in sequence:
+            return_string = return_string + '{' 
+            first = True
+            for item in transaction:
+                if first:
+                    return_string = return_string + item.strip('\'')
+                    first = False
+                else:
+                    return_string = return_string + ',' + item.strip('\'')
+            return_string = return_string + '}'
+
+    return return_string
+
 def main():
-    seq_path = '/Users/elequaranta/Documents/Chicago/CS583/MS-GSP/01/data.txt'
-    param_path = '/Users/elequaranta/Documents/Chicago/CS583/MS-GSP/01/params.txt'
+    seq_path = '/Users/elequaranta/Documents/Chicago/CS583/MS-GSP/00/data.txt'
+    param_path = '/Users/elequaranta/Documents/Chicago/CS583/MS-GSP/00/params.txt'
     start = time.time()
     frequent = MSGSP(seq_path, param_path)
     end = time.time()
     print(frequent)
     print('Time elapsed: ', end-start)
-    file = open('/Users/elequaranta/Documents/Chicago/CS583/MS-GSP/01/results.txt', 'w')
-    for seq in frequent:
-        file.write(str(seq) + "\n")
+    file = open('/Users/elequaranta/Documents/Chicago/CS583/MS-GSP/00/results.txt', 'w')
+    for i in range (0, len(frequent)):
+        Fk = frequent[i]
+        counter = 0
+        file.write('**************************************\n')
+        file.write('{0}-sequences:\n\n'.format(i+1))
+        for seq in Fk:
+            file.write("<" + print_format(seq) + ">\n")
+            counter = counter + 1
+        file.write('\nThe count is: {0}\n'.format(counter))
+    
     file.close()
 
 
