@@ -22,8 +22,7 @@ def load_MIS_sdc(path, items):
         lines = file.readlines()
         for line in lines:
             if ('mis' in line.lower()):
-                item = line[line.find("(") + 1:line.find(
-                    ")")].strip()  # if we don't parse to integer it will be able to work with letters as items as well + with MIS(rest)
+                item = line[line.find("(") + 1:line.find(")")].strip()  # if we don't parse to integer it will be able to work with letters as items as well + with MIS(rest)
                 value = float(line[line.find('=') + 1:].strip())
                 read_MIS[item] = value
             elif ('sdc' in line.lower()):
@@ -103,7 +102,7 @@ def level2_candidate_gen(num_seq, L, sup_counts):
     candidates = []
     for l in L:
         if item_sups[l] >= MIS[l]:
-            candidates.extend([[[l],[l]],[[l,l]]])
+            candidates.extend([[[l],[l]]])
             for h in L[L.index(l) + 1:]:
                 if (item_sups[h] >= MIS[l]) and (abs(item_sups[h] - item_sups[l]) <= sdc):
                     candidates.extend([[[l, h]], [[l], [h]], [[h], [l]]])
@@ -114,8 +113,6 @@ def candidate_gen(F_previous):
     C = []
     for s1 in F_previous:
         for s2 in F_previous:
-            if(s1 == [['8', '5'], ['3']] and s2 == [['8', '5'], ['3']]):
-                print('here')
             minsup1, index1 = get_itemset_ms(s1)
             minsup2, index2 = get_itemset_ms(s2)
             # if first item in s1 or last item in s2 is the only one with minimum support:
@@ -124,8 +121,6 @@ def candidate_gen(F_previous):
                     if (get_size(s2[-1]) == 1):
                         c = copy.deepcopy(s1)
                         c.append([last_item(s2)])
-                        if(c == [['4', '7'], ['3']]):
-                            print('here')
                         if(check_sdc(c) and is_contained(c, C) == False):
                             C.append(c)
                         if ((get_length(s1) == 2 and get_length(s2) == 2) & (MIS[last_item(s2)] >= MIS[last_item(s1)])):
@@ -134,8 +129,6 @@ def candidate_gen(F_previous):
                             last_c[0].append(last_item(s2))
                             del c[-1]
                             c.extend(last_c)
-                            if(c == [['4', '7'], ['3']]):
-                                print('here')
                             if(check_sdc(c) and is_contained(c, C) == False):
                                 C.append(c)
                     elif(((get_length(s1) == 2 & get_size(s1) == 1) & (MIS[last_item(s2)] >= MIS[last_item(s1)])) or (get_length(s1) > 2)):
@@ -144,8 +137,6 @@ def candidate_gen(F_previous):
                         last_c.append(last_item(s2))
                         del c[-1]
                         c.append(last_c)
-                        if(c == [['4', '7'], ['3']]):
-                            print('here')
                         if(check_sdc(c) and is_contained(c, C) == False):
                             C.append(c)
             elif (index2 == [get_length(s2) - 1]):
@@ -153,24 +144,18 @@ def candidate_gen(F_previous):
                     if (get_size(s1[0]) == 1):
                         c = copy.deepcopy(s2)
                         c.insert(0, [first_item(s1)])
-                        if(c == [['4', '7'], ['3']]):
-                            print('here')
                         if(check_sdc(c) and is_contained(c, C) == False):
                             C.append(c)
                         if ((get_length(s2) == 2 & get_length(s2) == 2) & (MIS[first_item(s1)] >= MIS[first_item(s2)])):
                             c = [[first_item(s1)]]
                             c[0].append(first_item(s2))
                             c.extend(s2[1:])
-                            if(c == [['4', '7'], ['3']]):
-                                print('here')
                             if(check_sdc(c) and is_contained(c, C) == False):
                                 C.append(c)
                     elif(((get_length(s2) == 2 & get_size(s2) == 1) & (MIS[first_item(s1)] >= MIS[first_item(s2)])) or (get_length(s2) > 2)):
                         c = [[first_item(s1)]]
                         c[0].extend(s2[0])
                         c.extend(s2[1:])
-                        if(c == [['4', '7'], ['3']]):
-                            print('here')
                         if(check_sdc(c) and is_contained(c, C) == False):
                             C.append(c)
             # general case (= neither the first item in s1 nor the last item in s2 is the only one with minimum support)
@@ -180,8 +165,6 @@ def candidate_gen(F_previous):
                     if get_size(s2[-1]) == 1:
                         c = copy.deepcopy(s1)
                         c.append([last_item(s2)])
-                        if(c == [['4', '7'], ['3']]):
-                            print('here')
                         if(check_sdc(c) and is_contained(c, C) == False):
                             C.append(c)
                     else:
@@ -190,8 +173,6 @@ def candidate_gen(F_previous):
                         last_c.append(last_item(s2))
                         del c[-1]
                         c.append(last_c)
-                        if(c == [['4', '7'], ['3']]):
-                            print('here')
                         if(check_sdc(c) and is_contained(c, C) == False):
                             C.append(c)
         
@@ -252,8 +233,6 @@ def delete_element(passed_sequence, idx):
 def prune_candidates(C, F):
     C_final = []
     for c in C:
-        if(c == [['8'], ['4', '6']]):
-            print('here')
         ms, idx = get_itemset_ms(c)
         tested = 0
         matches = 0
@@ -350,17 +329,11 @@ def MSGSP(seq_path, MIS_path):
         else:
             C = candidate_gen(F_prev)
         for c in C:
-            if(c == [['9', '2'], ['3']]):
-                print('here')
             counter = 0
             minMS, minIdx = get_itemset_ms(c)
             for sequence in sequences:
                 if (subsequence(c, sequence)):
                     counter = counter + 1
-
-            flag1 = (counter >= minMS * num_sequences)
-            term2 = minMS * num_sequences
-            flag2 = (c not in F)
             if ((counter >= float(format((minMS * num_sequences), '.10g'))) & (c not in F)):
                 Fk.append(c)
         if not(len(Fk)==0):
@@ -385,14 +358,14 @@ def print_format(sequence):
     return return_string
 
 def main():
-    seq_path = '/Users/aarshpatel/Downloads/DMTM (CS 583)/Project 1/MS-GSP-Algorithm/data.txt'
-    param_path = '/Users/aarshpatel/Downloads/DMTM (CS 583)/Project 1/MS-GSP-Algorithm/para.txt'
+    seq_path = '/Users/elequaranta/Documents/Chicago/CS583/MS-GSP/data.txt'
+    param_path = '/Users/elequaranta/Documents/Chicago/CS583/MS-GSP/params.txt'
     start = time.time()
     frequent = MSGSP(seq_path, param_path)
     end = time.time()
     print(frequent)
     print('Time elapsed: ', end-start)
-    file = open('/Users/aarshpatel/Downloads/DMTM (CS 583)/Project 1/MS-GSP-Algorithm/results.txt', 'w')
+    file = open('/Users/elequaranta/Documents/Chicago/CS583/MS-GSP/results.txt', 'w')
     for i in range (0, len(frequent)):
         Fk = frequent[i]
         counter = 0
@@ -405,11 +378,6 @@ def main():
     
     file.close()
 
-
-#  Ctest = [[['40'], ['50'], ['40'], ['30']]]
-#  Ftest = [[['40'], ['50'], ['30']], [['40'], ['50'], ['40']], [['50'], ['40'], ['30']], [['40'], ['40'], ['30']]]
-
-#  prune_candidates(Ctest, Ftest)
 
 if __name__ == '__main__':
     main()
