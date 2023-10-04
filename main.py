@@ -10,7 +10,8 @@ def readInput(path):
             parts = transactions.split("}{")
             lists = [part.strip("{}").split(",") for part in parts]
             seq = [[item.strip() for item in transact] for transact in lists]
-            sequence.append(seq)
+            if not(seq == [['']]):
+                sequence.append(seq)
         data.close()
     return sequence
 
@@ -74,6 +75,8 @@ def init_pass(M, sequences):
             item = M[j]
             if sup_counts[item] >= MIS[M[first_idx]] * len(sequences):
                 L.append(item)
+    global support_counts
+    support_counts = sup_counts
     return L, sup_counts
 
 
@@ -113,6 +116,8 @@ def candidate_gen(F_previous):
     C = []
     for s1 in F_previous:
         for s2 in F_previous:
+            if(s1==[['13'], ['3']] and s2==[['3', '4']]):
+                print('here')
             minsup1, index1 = get_itemset_ms(s1)
             minsup2, index2 = get_itemset_ms(s2)
             # if first item in s1 or last item in s2 is the only one with minimum support:
@@ -139,7 +144,7 @@ def candidate_gen(F_previous):
                         c.append(last_c)
                         if(check_sdc(c) and is_contained(c, C) == False):
                             C.append(c)
-            elif (index2 == [get_length(s2) - 1]):
+            if (index2 == [get_length(s2) - 1]):
                 if ((delete_element(s2, get_length(s2) - 2) == delete_element(s1, 0)) & (MIS[first_item(s1)] >= MIS[last_item(s2)])):
                     if (get_size(s1[0]) == 1):
                         c = copy.deepcopy(s2)
@@ -281,7 +286,7 @@ def same_transaction(t, T):
     except ValueError:
         return -1
     
-def check_sdc(candidate):
+def old_check_sdc(candidate):
     unique = [element for transaction in candidate for element in transaction]
     mis_list = []
     for el in unique:
@@ -289,6 +294,18 @@ def check_sdc(candidate):
     max_val = max(mis_list)
     min_val = min(mis_list)
     if((max_val - min_val) <= sdc):
+        return True
+    else:
+        return False
+    
+def check_sdc(candidate):
+    unique = [element for transaction in candidate for element in transaction]
+    sc_list = []
+    for el in unique:
+        sc_list.append(support_counts[el])
+    max_val = max(sc_list)
+    min_val = min(sc_list)
+    if((max_val - min_val) <= sdc * num_sequences):
         return True
     else:
         return False
@@ -313,6 +330,7 @@ def is_contained(c_passed, C):
 def MSGSP(seq_path, MIS_path):
     F = []
     sequences = readInput(seq_path)
+    global num_sequences
     num_sequences = len(sequences)
     items = get_unique_items(sequences)
     load_MIS_sdc(MIS_path, items)
@@ -358,14 +376,23 @@ def print_format(sequence):
     return return_string
 
 def main():
-    seq_path = '/Users/elequaranta/Documents/Chicago/CS583/MS-GSP/data.txt'
-    param_path = '/Users/elequaranta/Documents/Chicago/CS583/MS-GSP/params.txt'
+    data_path_1 = '/Users/elequaranta/Documents/Chicago/CS583/MS-GSP/small-data-1/data-1.txt'
+    data_path_2 = '/Users/elequaranta/Documents/Chicago/CS583/MS-GSP/large-data-2/data2.txt'
+    para_path_1_1 = '/Users/elequaranta/Documents/Chicago/CS583/MS-GSP/small-data-1/para1-1.txt'
+    para_path_1_2 = '/Users/elequaranta/Documents/Chicago/CS583/MS-GSP/small-data-1/para1-2.txt'
+    para_path_2_1 = '/Users/elequaranta/Documents/Chicago/CS583/MS-GSP/large-data-2/para2-1.txt'
+    para_path_2_2 = '/Users/elequaranta/Documents/Chicago/CS583/MS-GSP/large-data-2/para2-2.txt'
+    results_path_1_1 = '/Users/elequaranta/Documents/Chicago/CS583/MS-GSP/results/result-1-1.txt'
+    results_path_1_2 = '/Users/elequaranta/Documents/Chicago/CS583/MS-GSP/results/result-1-2.txt'
+    results_path_2_1 = '/Users/elequaranta/Documents/Chicago/CS583/MS-GSP/results/result-2-1.txt'
+    results_path_2_2 = '/Users/elequaranta/Documents/Chicago/CS583/MS-GSP/results/result-2-2.txt'
+
     start = time.time()
-    frequent = MSGSP(seq_path, param_path)
+    frequent = MSGSP(data_path_2, para_path_2_1)
     end = time.time()
     print(frequent)
     print('Time elapsed: ', end-start)
-    file = open('/Users/elequaranta/Documents/Chicago/CS583/MS-GSP/results.txt', 'w')
+    file = open(results_path_2_1, 'w')
     for i in range (0, len(frequent)):
         Fk = frequent[i]
         counter = 0
