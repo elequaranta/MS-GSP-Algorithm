@@ -116,8 +116,6 @@ def candidate_gen(F_previous):
     C = []
     for s1 in F_previous:
         for s2 in F_previous:
-            if(s1==[['13'], ['3']] and s2==[['3', '4']]):
-                print('here')
             minsup1, index1 = get_itemset_ms(s1)
             minsup2, index2 = get_itemset_ms(s2)
             # if first item in s1 or last item in s2 is the only one with minimum support:
@@ -382,28 +380,37 @@ def main():
     para_path_1_2 = '/Users/elequaranta/Documents/Chicago/CS583/MS-GSP/small-data-1/para1-2.txt'
     para_path_2_1 = '/Users/elequaranta/Documents/Chicago/CS583/MS-GSP/large-data-2/para2-1.txt'
     para_path_2_2 = '/Users/elequaranta/Documents/Chicago/CS583/MS-GSP/large-data-2/para2-2.txt'
-    results_path_1_1 = '/Users/elequaranta/Documents/Chicago/CS583/MS-GSP/results/result-1-1.txt'
-    results_path_1_2 = '/Users/elequaranta/Documents/Chicago/CS583/MS-GSP/results/result-1-2.txt'
-    results_path_2_1 = '/Users/elequaranta/Documents/Chicago/CS583/MS-GSP/results/result-2-1.txt'
-    results_path_2_2 = '/Users/elequaranta/Documents/Chicago/CS583/MS-GSP/results/result-2-2.txt'
+    results_path_1_1 = '/Users/elequaranta/Documents/Chicago/CS583/MS-GSP/Aarsh-Eleonora/result-1-1.txt'
+    results_path_1_2 = '/Users/elequaranta/Documents/Chicago/CS583/MS-GSP/Aarsh-Eleonora/result-1-2.txt'
+    results_path_2_1 = '/Users/elequaranta/Documents/Chicago/CS583/MS-GSP/Aarsh-Eleonora/result-2-1.txt'
+    results_path_2_2 = '/Users/elequaranta/Documents/Chicago/CS583/MS-GSP/Aarsh-Eleonora/result-2-2.txt'
 
-    start = time.time()
-    frequent = MSGSP(data_path_2, para_path_2_1)
-    end = time.time()
-    print(frequent)
-    print('Time elapsed: ', end-start)
-    file = open(results_path_2_1, 'w')
-    for i in range (0, len(frequent)):
-        Fk = frequent[i]
-        counter = 0
-        file.write('**************************************\n')
-        file.write('{0}-sequences:\n\n'.format(i+1))
-        for seq in Fk:
-            file.write("<" + print_format(seq) + ">\n")
-            counter = counter + 1
-        file.write('\nThe count is: {0}\n'.format(counter))
+    data_paths = [data_path_1, data_path_2]
+    param_paths = [[para_path_1_1, para_path_1_2], [para_path_2_1, para_path_2_2]]
+    results_paths = [[results_path_1_1, results_path_1_2], [results_path_2_1, results_path_2_2]]
+
+    for h in range(0, len(data_paths)):
+        for j in range(0, len(param_paths)):
+            print('Test ', str(h+1), '.', str(j+1), '\n')
+            start = time.time()
+            frequent = MSGSP(data_paths[h], param_paths[h][j])
+            end = time.time()
+            print(frequent)
+            print('Time elapsed: ', end-start)
+            file = open(results_paths[h][j], 'w')
+            for i in range (0, len(frequent)):
+                Fk = frequent[i]
+                counter = 0
+                file.write('**************************************\n')
+                file.write('{0}-sequences:\n\n'.format(i+1))
+                for seq in Fk:
+                    file.write("<" + print_format(seq) + ">\n")
+                    counter = counter + 1
+                file.write('\nThe count is: {0}\n'.format(counter))
+            
+            file.close()
+
     
-    file.close()
 
 
 if __name__ == '__main__':
