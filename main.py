@@ -374,16 +374,16 @@ def print_format(sequence):
     return return_string
 
 def main():
-    data_path_1 = '/Users/elequaranta/Documents/Chicago/CS583/MS-GSP/small-data-1/data-1.txt'
-    data_path_2 = '/Users/elequaranta/Documents/Chicago/CS583/MS-GSP/large-data-2/data2.txt'
-    para_path_1_1 = '/Users/elequaranta/Documents/Chicago/CS583/MS-GSP/small-data-1/para1-1.txt'
-    para_path_1_2 = '/Users/elequaranta/Documents/Chicago/CS583/MS-GSP/small-data-1/para1-2.txt'
-    para_path_2_1 = '/Users/elequaranta/Documents/Chicago/CS583/MS-GSP/large-data-2/para2-1.txt'
-    para_path_2_2 = '/Users/elequaranta/Documents/Chicago/CS583/MS-GSP/large-data-2/para2-2.txt'
-    results_path_1_1 = '/Users/elequaranta/Documents/Chicago/CS583/MS-GSP/Aarsh-Eleonora/result-1-1.txt'
-    results_path_1_2 = '/Users/elequaranta/Documents/Chicago/CS583/MS-GSP/Aarsh-Eleonora/result-1-2.txt'
-    results_path_2_1 = '/Users/elequaranta/Documents/Chicago/CS583/MS-GSP/Aarsh-Eleonora/result-2-1.txt'
-    results_path_2_2 = '/Users/elequaranta/Documents/Chicago/CS583/MS-GSP/Aarsh-Eleonora/result-2-2.txt'
+    data_path_1 = '/MS-GSP/small-data-1/data-1.txt'
+    data_path_2 = '/MS-GSP/large-data-2/data2.txt'
+    para_path_1_1 = '/MS-GSP/small-data-1/para1-1.txt'
+    para_path_1_2 = '/MS-GSP/small-data-1/para1-2.txt'
+    para_path_2_1 = '/MS-GSP/large-data-2/para2-1.txt'
+    para_path_2_2 = '/MS-GSP/large-data-2/para2-2.txt'
+    results_path_1_1 = '/MS-GSP/Aarsh-Eleonora/result-1-1.txt'
+    results_path_1_2 = '/MS-GSP/Aarsh-Eleonora/result-1-2.txt'
+    results_path_2_1 = '/MS-GSP/Aarsh-Eleonora/result-2-1.txt'
+    results_path_2_2 = '/MS-GSP/Aarsh-Eleonora/result-2-2.txt'
 
     data_paths = [data_path_1, data_path_2]
     param_paths = [[para_path_1_1, para_path_1_2], [para_path_2_1, para_path_2_2]]
@@ -391,12 +391,11 @@ def main():
 
     for h in range(0, len(data_paths)):
         for j in range(0, len(param_paths)):
-            print('Test ', str(h+1), '.', str(j+1), '\n')
+            print('Testing ', str(h+1), '.', str(j+1), '\n')
             start = time.time()
             frequent = MSGSP(data_paths[h], param_paths[h][j])
             end = time.time()
-            print(frequent)
-            print('Time elapsed: ', end-start)
+            print('Time elapsed:', end-start, 'seconds.\n')
             file = open(results_paths[h][j], 'w')
             for i in range (0, len(frequent)):
                 Fk = frequent[i]
